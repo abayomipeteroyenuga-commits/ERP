@@ -1,4 +1,4 @@
-const CACHE = "ethan-erp-work-v2";
+const CACHE = "ethan-erp-work-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS = [
   "./app.js",
   "./operations.js",
   "./erp-modules.js",
+  "./erp-upgrade.js",
   "./config.js",
   "./supabase-client.js",
   "./course-narration-data.js",
@@ -36,6 +37,9 @@ self.addEventListener("fetch", event => {
     url.pathname.endsWith("/index.html") ||
     url.pathname.endsWith("/styles.css") ||
     url.pathname.endsWith("/app.js") ||
+    url.pathname.endsWith("/operations.js") ||
+    url.pathname.endsWith("/erp-modules.js") ||
+    url.pathname.endsWith("/erp-upgrade.js") ||
     url.pathname.endsWith("/config.js") ||
     url.pathname.endsWith("/supabase-client.js") ||
     url.pathname.endsWith("/course-narration-data.js");
