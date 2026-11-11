@@ -50,7 +50,9 @@ function setSession(user){
 }
 function initials(name){ return name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join("") || "EU"; }
 
-const ETHAN_SUPER_ADMIN_EMAILS = new Set(["fedora4jesus@gmail.com"]);
+const ETHAN_SUPER_ADMIN_EMAILS = new Set(["abayomipeteroyenuga@gmail.com"]);
+const ETHAN_SINGLE_ADMIN_EMAIL = "abayomipeteroyenuga@gmail.com";
+function isAuthorisedEthanAdmin(email){ return String(email||"").trim().toLowerCase()===ETHAN_SINGLE_ADMIN_EMAIL; }
 function resolveAuthenticatedRole(authUser, profile){
   const email=String(authUser?.email||profile?.email||"").trim().toLowerCase();
   if(ETHAN_SUPER_ADMIN_EMAILS.has(email)) return "super_admin";
@@ -125,10 +127,12 @@ $("#signinForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const email=$("#signinEmail").value.trim().toLowerCase(), password=$("#signinPassword").value;
   const msg=$("#signinMessage");
+  if(!isAuthorisedEthanAdmin(email)){ msg.textContent="Access restricted. Only the authorised Ethan Digital Academy administrator can sign in to this ERP workspace."; msg.className="form-message error"; return; }
   try{
     if(window.ETHAN_BACKEND?.ready){
       const result=await window.ETHAN_BACKEND.signIn(email,password);
       const authUser=result.user;
+      if(!isAuthorisedEthanAdmin(authUser?.email)){ await window.ETHAN_BACKEND.signOut().catch(()=>{}); throw new Error("Access restricted. This ERP workspace is reserved for the authorised administrator."); }
       let profile=null;
       try{ profile=await window.ETHAN_BACKEND.getProfile(authUser.id); }catch(_){}
       const role=resolveAuthenticatedRole(authUser,profile);
@@ -209,6 +213,7 @@ const navByRole = {
 
 async function openPortal(user){
   const canonicalEmail=String(user?.email||"").trim().toLowerCase();
+  if(!isAuthorisedEthanAdmin(canonicalEmail)){ currentUser=null; if(window.ETHAN_BACKEND?.ready) await window.ETHAN_BACKEND.signOut().catch(()=>{}); $("#portal").classList.add("hidden"); $("#authScreen").classList.remove("hidden"); throw new Error("Access restricted to the authorised Ethan Digital Academy administrator."); }
   if(ETHAN_SUPER_ADMIN_EMAILS.has(canonicalEmail)){
     user={...user,role:"super_admin",learnerType:"super_admin"};
   }
